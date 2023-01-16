@@ -10,7 +10,18 @@ To explain how each product above was used in the code, we've written a series o
 
 ## Setting up
 
-In order for this app to work, you will need to create a [Firebase project](https://firebase.google.com/):
+In order for this app to work, y
+
+
+
+
+
+
+
+
+
+
+ou will need to create a [Firebase project](https://firebase.google.com/):
 
 * Clone this repository
 * Create a Firebase project in the [Firebase Console](https://console.firebase.google.com/)

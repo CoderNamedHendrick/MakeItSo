@@ -29,56 +29,71 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.makeitso.R.drawable as AppIcon
-import com.example.makeitso.R.string as AppText
 import com.example.makeitso.common.composable.ActionToolbar
 import com.example.makeitso.common.ext.smallSpacer
 import com.example.makeitso.common.ext.toolbarActions
 import com.example.makeitso.model.Task
+import com.example.makeitso.R.drawable as AppIcon
+import com.example.makeitso.R.string as AppText
 
 @OptIn(ExperimentalLifecycleComposeApi::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 @ExperimentalMaterialApi
 fun TasksScreen(
-  openScreen: (String) -> Unit,
-  modifier: Modifier = Modifier,
-  viewModel: TasksViewModel = hiltViewModel()
+    openScreen: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: TasksViewModel = hiltViewModel()
 ) {
-  Scaffold(
-    floatingActionButton = {
-      FloatingActionButton(
-        onClick = { viewModel.onAddClick(openScreen) },
-        backgroundColor = MaterialTheme.colors.primary,
-        contentColor = MaterialTheme.colors.onPrimary,
-        modifier = modifier.padding(16.dp)
-      ) {
-        Icon(Icons.Filled.Add, "Add")
-      }
-    }
-  ) {
-    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
-      ActionToolbar(
-        title = AppText.tasks,
-        modifier = Modifier.toolbarActions(),
-        endActionIcon = AppIcon.ic_settings,
-        endAction = { viewModel.onSettingsClick(openScreen) }
-      )
 
-      Spacer(modifier = Modifier.smallSpacer())
+    val tasks = viewModel.tasks.collectAsStateWithLifecycle(initialValue = emptyList())
+    val options by viewModel.options
 
-      LazyColumn {
-        items(emptyList<Task>(), key = { it.id }) { taskItem ->
-          TaskItem(
-            task = taskItem,
-            options = listOf(),
-            onCheckChange = { viewModel.onTaskCheckChange(taskItem) },
-            onActionClick = { action -> viewModel.onTaskActionClick(openScreen, taskItem, action) }
-          )
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { viewModel.onAddClick(openScreen) },
+                backgroundColor = MaterialTheme.colors.primary,
+                contentColor = MaterialTheme.colors.onPrimary,
+                modifier = modifier.padding(16.dp)
+            ) {
+                Icon(Icons.Filled.Add, "Add")
+            }
         }
-      }
-    }
-  }
+    ) {
+        Column(
+            modifier = Modifier
+              .fillMaxWidth()
+              .fillMaxHeight()
+        ) {
+            ActionToolbar(
+                title = AppText.tasks,
+                modifier = Modifier.toolbarActions(),
+                endActionIcon = AppIcon.ic_settings,
+                endAction = { viewModel.onSettingsClick(openScreen) }
+            )
 
-  LaunchedEffect(viewModel) { viewModel.loadTaskOptions() }
+            Spacer(modifier = Modifier.smallSpacer())
+
+
+            LazyColumn {
+                items(tasks.value, key = { it.id }) { taskItem ->
+                    TaskItem(
+                        task = taskItem,
+                        options = options,
+                        onCheckChange = { viewModel.onTaskCheckChange(taskItem) },
+                        onActionClick = { action ->
+                            viewModel.onTaskActionClick(
+                                openScreen,
+                                taskItem,
+                                action
+                            )
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(viewModel) { viewModel.loadTaskOptions() }
 }
